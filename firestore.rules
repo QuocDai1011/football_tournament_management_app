@@ -1,0 +1,99 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Admins collection - only admins can read/write their own profile
+    match /admins/{adminId} {
+      allow read: if isAuthenticated() && request.auth.uid == adminId;
+      allow write: if isAuthenticated() && request.auth.uid == adminId;
+    }
+
+    // Tournaments - only admins can write, anyone can read (for public facing)
+    match /tournaments/{tournamentId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Seasons
+    match /seasons/{seasonId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Teams
+    match /teams/{teamId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Players
+    match /players/{playerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Matches
+    match /matches/{matchId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      // Match events subcollection
+      match /events/{eventId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+
+      // Match lineups subcollection
+      match /lineups/{lineupId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+
+    // Standings
+    match /standings/{standingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Awards
+    match /awards/{awardId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Registrations
+    match /registrations/{regId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Notifications
+    match /notifications/{notifId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Player Statistics
+    match /player_statistics/{statId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Team Statistics
+    match /team_statistics/{statId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "552844690815",
+    "project_id": "football-tournament-mana-d5086",
+    "storage_bucket": "football-tournament-mana-d5086.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:552844690815:android:ca59126d1dbc7cf45f464a",
+        "android_client_info": {
+          "package_name": "com.example.football_tournament_manager_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvNhgLt-PcgaHECFIo17zqGdBJyKmHkwI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -157,16 +157,18 @@ class DashboardStats {
 /// Provider tổng hợp dashboard stats từ các stream
 /// Dùng StreamProvider để toàn bộ dashboard reactive
 final dashboardStatsProvider =
-    StreamProvider.autoDispose<DashboardStats>((ref) async* {
-  // Lắng nghe tất cả streams cùng lúc
-  // Mỗi khi bất kỳ stream nào thay đổi → emit DashboardStats mới
-
+    Provider.autoDispose<AsyncValue<DashboardStats>>((ref) {
   // Combine streams bằng cách watch từng provider
   final tournamentsAsync = ref.watch(allTournamentsStreamProvider);
   final teamsAsync = ref.watch(allTeamsStreamProvider);
   final playersAsync = ref.watch(allPlayersStreamProvider);
   final liveAsync = ref.watch(liveMatchesStreamProvider);
   final recentAsync = ref.watch(recentMatchesStreamProvider);
+
+  // Chỉ loading khi tất cả dữ liệu chính đang loading và chưa có data
+  if (tournamentsAsync.isLoading && tournamentsAsync.valueOrNull == null) {
+    return const AsyncValue.loading();
+  }
 
   final tournaments = tournamentsAsync.valueOrNull ?? [];
   final teams = teamsAsync.valueOrNull ?? [];
@@ -188,7 +190,7 @@ final dashboardStatsProvider =
     return d.year == now.year && d.month == now.month && d.day == now.day;
   }).length;
 
-  yield DashboardStats(
+  return AsyncValue.data(DashboardStats(
     totalTournaments: tournaments.length,
     activeTournaments: active.length,
     upcomingTournaments: upcoming.length,
@@ -200,7 +202,7 @@ final dashboardStatsProvider =
     recentMatches: recentMatches,
     liveMatchList: liveMatches,
     activeTournamentList: active.take(5).toList(),
-  );
+  ));
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -39,7 +39,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: AppRoutes.splash,
     debugLogDiagnostics: false,
     redirect: (context, state) {
-      final authAsync = ref.read(authStateProvider);
+      final authAsync = ref.read(currentAdminProvider);
       final location = state.matchedLocation;
 
       // Khi auth state đang loading (chưa biết user có login không)
@@ -55,8 +55,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         return AppRoutes.login;
       }
 
-      final user = authAsync.valueOrNull;
-      final isAuthenticated = user != null;
+      final admin = authAsync.valueOrNull;
+      final isAuthenticated = admin != null;
       final isSplash = location == AppRoutes.splash;
       final isLogin = location == AppRoutes.login;
 
@@ -209,7 +209,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 
   // Khi auth state thay đổi → chỉ gọi refresh (không recreate router)
-  ref.listen<AsyncValue>(authStateProvider, (previous, next) {
+  ref.listen<AsyncValue>(currentAdminProvider, (previous, next) {
     // Chỉ refresh khi state đã resolve (không còn loading)
     if (!next.isLoading) {
       router.refresh();

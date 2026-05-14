@@ -68,15 +68,21 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
     final notifier = ref.read(playerNotifierProvider.notifier);
     final now = DateTime.now();
 
-    final player = PlayerModel(
-      id: _existing?.id ?? const Uuid().v4(),
+    final player = _existing?.copyWith(
       name: _nameController.text.trim(),
       teamId: _selectedTeamId!,
-      teamName: _existing?.teamName,
       position: _position,
       shirtNumber: int.tryParse(_shirtController.text) ?? 10,
       isCaptain: _isCaptain,
-      createdAt: _existing?.createdAt ?? now,
+      updatedAt: now,
+    ) ?? PlayerModel(
+      id: const Uuid().v4(),
+      name: _nameController.text.trim(),
+      teamId: _selectedTeamId!,
+      position: _position,
+      shirtNumber: int.tryParse(_shirtController.text) ?? 10,
+      isCaptain: _isCaptain,
+      createdAt: now,
       updatedAt: now,
     );
 

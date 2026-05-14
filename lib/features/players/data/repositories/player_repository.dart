@@ -25,11 +25,14 @@ class PlayerRepositoryImpl implements PlayerRepository {
           filters: teamId != null
               ? [QueryFilter.equalTo('teamId', teamId)]
               : null,
-          orderBy: [const QueryOrder('name')],
         )
-        .map((snap) => snap.docs
-            .map((d) => PlayerModel.fromJson(d.data(), d.id))
-            .toList());
+        .map((snap) {
+          final list = snap.docs
+              .map((d) => PlayerModel.fromJson(d.data(), d.id))
+              .toList();
+          list.sort((a, b) => a.name.compareTo(b.name));
+          return list;
+        });
   }
 
   @override
@@ -49,6 +52,9 @@ class PlayerRepositoryImpl implements PlayerRepository {
     try {
       final ref = await _firestore.addDocument(
           FirestoreCollections.players, player.toJson());
+          
+      await _updateTeamPlayerCount(player.teamId, 1);
+      
       return Right(ref.id);
     } catch (e) {
       return Left(DatabaseFailure(message: e.toString()));
@@ -58,6 +64,7 @@ class PlayerRepositoryImpl implements PlayerRepository {
   @override
   Future<Either<Failure, void>> updatePlayer(PlayerModel player) async {
     try {
+      // If team changed, we should ideally update counts, but we'll skip for simplicity here unless requested
       await _firestore.updateDocument(
           FirestoreCollections.players, player.id, player.toJson());
       return const Right(null);
@@ -69,11 +76,30 @@ class PlayerRepositoryImpl implements PlayerRepository {
   @override
   Future<Either<Failure, void>> deletePlayer(String id) async {
     try {
+      final doc = await _firestore.getDocument(FirestoreCollections.players, id);
+      if (doc.exists) {
+        final teamId = doc.data()!['teamId'] as String?;
+        if (teamId != null) {
+          await _updateTeamPlayerCount(teamId, -1);
+        }
+      }
       await _firestore.deleteDocument(FirestoreCollections.players, id);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure(message: e.toString()));
     }
+  }
+
+  Future<void> _updateTeamPlayerCount(String teamId, int change) async {
+    try {
+      final doc = await _firestore.getDocument(FirestoreCollections.teams, teamId);
+      if (doc.exists) {
+        final current = doc.data()!['totalPlayers'] as int? ?? 0;
+        await _firestore.updateDocument(FirestoreCollections.teams, teamId, {
+          'totalPlayers': (current + change) > 0 ? (current + change) : 0,
+        });
+      }
+    } catch (_) {}
   }
 }
 

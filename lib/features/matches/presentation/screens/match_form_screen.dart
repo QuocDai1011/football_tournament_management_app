@@ -346,6 +346,37 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Match status
+                  const Text('Match Status',
+                      style: TextStyle(
+                          color: AppColors.textSecondary, fontSize: 12)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: MatchStatus.values.map((s) {
+                      final selected = _status == s;
+                      return ChoiceChip(
+                        label: Text(s.displayName,
+                            style: const TextStyle(fontSize: 12)),
+                        selected: selected,
+                        onSelected: (_) => setState(() => _status = s),
+                        selectedColor: AppColors.warning.withOpacity(0.2),
+                        labelStyle: TextStyle(
+                          color: selected
+                              ? AppColors.warning
+                              : AppColors.textSecondary,
+                        ),
+                        side: BorderSide(
+                          color: selected
+                              ? AppColors.warning
+                              : AppColors.glassBorder,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+
                   // Group & Round
                   Row(
                     children: [

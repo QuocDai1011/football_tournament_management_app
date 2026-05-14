@@ -46,10 +46,13 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
     return _firestore.collectionStream(
       FirestoreCollections.registrations,
       filters: filters.isEmpty ? null : filters,
-      orderBy: [const QueryOrder('registeredAt', descending: true)],
-    ).map((snap) => snap.docs
-        .map((d) => RegistrationModel.fromJson(d.data(), d.id))
-        .toList());
+    ).map((snap) {
+      final list = snap.docs
+          .map((d) => RegistrationModel.fromJson(d.data(), d.id))
+          .toList();
+      list.sort((a, b) => b.registeredAt.compareTo(a.registeredAt));
+      return list;
+    });
   }
 
   @override
@@ -69,15 +72,19 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
       RegistrationModel registration) async {
     try {
       // Check for duplicate registration
-      final existing = await _firestore.getCollection(
+      final existingSnap = await _firestore.getCollection(
         FirestoreCollections.registrations,
         filters: [
           QueryFilter.equalTo('tournamentId', registration.tournamentId),
-          QueryFilter.equalTo('teamId', registration.teamId),
         ],
       );
 
-      if (existing.docs.isNotEmpty) {
+      final isDuplicate = existingSnap.docs.any((doc) {
+        final data = doc.data();
+        return data['teamId'] == registration.teamId;
+      });
+
+      if (isDuplicate) {
         return Left(DatabaseFailure.alreadyExists('Registration'));
       }
 

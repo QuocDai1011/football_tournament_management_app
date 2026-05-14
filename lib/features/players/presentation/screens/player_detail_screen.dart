@@ -112,7 +112,7 @@ class PlayerDetailScreen extends ConsumerWidget {
                         physics: const NeverScrollableScrollPhysics(),
                         mainAxisSpacing: 8,
                         crossAxisSpacing: 8,
-                        childAspectRatio: 1.4,
+                        childAspectRatio: 1.1,
                         children: [
                           _StatCard('Apps', player.appearances.toString(),
                               Icons.sports_soccer),

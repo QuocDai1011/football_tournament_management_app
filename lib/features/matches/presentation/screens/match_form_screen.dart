@@ -158,7 +158,7 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
             .first;
 
         for (final m in existingMatches) {
-          if (m.id == widget.matchId || m.scheduledAt == null) continue;
+          if (m.id == widget.matchId || m.scheduledAt == null || m.status == MatchStatus.finished) continue;
 
           final timeDiff = _scheduledAt!.difference(m.scheduledAt!).inMinutes.abs();
           if (timeDiff < 120) { // 2 hours window

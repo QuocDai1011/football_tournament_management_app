@@ -7,6 +7,7 @@ import '../../data/repositories/match_repository.dart';
 import '../../domain/models/match_model.dart';
 import '../../../../shared/widgets/loading_states.dart';
 import '../../../../shared/widgets/app_image.dart';
+import '../../../../shared/widgets/confirm_delete_dialog.dart';
 
 class MatchDetailScreen extends ConsumerWidget {
   final String id;
@@ -52,6 +53,10 @@ class MatchDetailScreen extends ConsumerWidget {
                             fontWeight: FontWeight.w700),
                       ),
                     ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                    onPressed: () => _showDeleteDialog(context, ref, match),
+                  ),
                 ],
               ),
 
@@ -135,6 +140,30 @@ class MatchDetailScreen extends ConsumerWidget {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Match started!')));
     }
+  }
+
+  void _showDeleteDialog(BuildContext context, WidgetRef ref, MatchModel match) {
+    showDialog(
+      context: context,
+      builder: (context) => ConfirmDeleteDialog(
+        itemName: '${match.homeTeamName} vs ${match.awayTeamName}',
+        itemType: 'match',
+        onConfirm: () async {
+          final result = await ref.read(matchRepositoryProvider).deleteMatch(match.id);
+          result.fold(
+            (l) => ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${l.message}')),
+            ),
+            (r) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Match deleted successfully')),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
   void _showAddEventDialog(

@@ -7,6 +7,7 @@ import '../widgets/tournament_section.dart';
 import '../widgets/teams_section.dart';
 import '../widgets/players_section.dart';
 import '../widgets/live_matches_section.dart';
+import '../../../auth/domain/notifiers/auth_notifier.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -77,28 +78,35 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Football Dashboard',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Realtime tournament & match updates',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                ),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Football Dashboard',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Realtime tournament & match updates',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-            // Sync indicator
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            Row(
+              children: [
+                // Sync indicator
+                Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
                 color: AppColors.surfaceVariant,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusM),
@@ -131,11 +139,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                 ],
               ),
             ),
+            const SizedBox(width: 12),
+            IconButton(
+              onPressed: () {
+                ref.read(authNotifierProvider.notifier).signOut();
+              },
+              icon: const Icon(Icons.logout, color: AppColors.error),
+              tooltip: 'Sign Out',
+            ),
           ],
         ),
       ],
-    );
-  }
+    ),
+  ],
+);
+}
 
   Widget _buildStatisticsSection(BuildContext context) {
     return ref.watch(dashboardStatsProvider).when(

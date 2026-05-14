@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../data/repositories/team_repository.dart';
+import '../../domain/models/team_model.dart';
 import '../../../players/data/repositories/player_repository.dart';
 import '../../../players/domain/models/player_model.dart';
 import '../../../../shared/widgets/loading_states.dart';
 import '../../../../shared/widgets/app_image.dart';
+import '../../../../shared/widgets/confirm_delete_dialog.dart';
 
 class TeamDetailScreen extends ConsumerWidget {
   final String id;
@@ -60,6 +62,9 @@ class TeamDetailScreen extends ConsumerWidget {
                   IconButton(
                       icon: const Icon(Icons.edit),
                       onPressed: () => context.go('/teams/$id/edit')),
+                  IconButton(
+                      icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                      onPressed: () => _showDeleteDialog(context, ref, team)),
                 ],
               ),
               SliverToBoxAdapter(
@@ -150,6 +155,30 @@ class TeamDetailScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, WidgetRef ref, TeamModel team) {
+    showDialog(
+      context: context,
+      builder: (context) => ConfirmDeleteDialog(
+        itemName: team.name,
+        itemType: 'team',
+        onConfirm: () async {
+          final result = await ref.read(teamRepositoryProvider).deleteTeam(team.id);
+          result.fold(
+            (l) => ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${l.message}')),
+            ),
+            (r) {
+              context.go(AppRoutes.teams);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Team deleted successfully')),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

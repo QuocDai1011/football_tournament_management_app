@@ -7,6 +7,7 @@ import '../../data/repositories/tournament_repository.dart';
 import '../../domain/models/tournament_model.dart';
 import '../../../../shared/widgets/loading_states.dart';
 import '../../../../shared/widgets/app_image.dart';
+import '../../../../shared/widgets/confirm_delete_dialog.dart';
 import '../../../matches/data/repositories/match_repository.dart';
 import '../../../matches/domain/models/match_model.dart';
 
@@ -78,6 +79,10 @@ class TournamentDetailScreen extends ConsumerWidget {
                   IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () => context.go('/tournaments/$id/edit'),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                    onPressed: () => _showDeleteDialog(context, ref, tournament),
                   ),
                 ],
               ),
@@ -185,6 +190,30 @@ class TournamentDetailScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, WidgetRef ref, TournamentModel tournament) {
+    showDialog(
+      context: context,
+      builder: (context) => ConfirmDeleteDialog(
+        itemName: tournament.name,
+        itemType: 'tournament',
+        onConfirm: () async {
+          final result = await ref.read(tournamentRepositoryProvider).deleteTournament(tournament.id);
+          result.fold(
+            (l) => ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${l.message}')),
+            ),
+            (r) {
+              context.go(AppRoutes.tournaments);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Tournament deleted successfully')),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

@@ -77,18 +77,18 @@ class SeasonsScreen extends ConsumerWidget {
   void _confirmDelete(BuildContext context, WidgetRef ref, SeasonModel season) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.surfaceVariant,
         title: const Text('Delete Season'),
         content: Text('Delete "${season.name}"? This cannot be undone.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               await ref.read(seasonNotifierProvider.notifier).delete(season.id);
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),

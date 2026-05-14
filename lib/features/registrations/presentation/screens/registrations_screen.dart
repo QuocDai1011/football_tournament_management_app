@@ -85,7 +85,7 @@ class RegistrationsScreen extends ConsumerWidget {
     final groupController = TextEditingController();
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.surfaceVariant,
         title: const Text('Approve Registration'),
         content: Column(
@@ -105,11 +105,11 @@ class RegistrationsScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               await ref.read(registrationNotifierProvider.notifier).approve(
                     reg.id,
                     groupController.text.trim().isEmpty
@@ -129,7 +129,7 @@ class RegistrationsScreen extends ConsumerWidget {
     final reasonController = TextEditingController();
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.surfaceVariant,
         title: const Text('Reject Registration'),
         content: Column(
@@ -146,11 +146,11 @@ class RegistrationsScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               await ref.read(registrationNotifierProvider.notifier).reject(
                     reg.id,
                     reasonController.text.trim(),
@@ -168,17 +168,17 @@ class RegistrationsScreen extends ConsumerWidget {
       BuildContext context, WidgetRef ref, RegistrationModel reg) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.surfaceVariant,
         title: const Text('Remove Registration'),
         content: Text('Remove ${reg.teamName} from this tournament?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               await ref
                   .read(registrationNotifierProvider.notifier)
                   .delete(reg.id);

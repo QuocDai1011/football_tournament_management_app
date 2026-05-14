@@ -84,6 +84,7 @@ class MatchModel {
   final String? group;
   final int? round;
   final DateTime? scheduledAt;
+  final DateTime? startedAt;
   final String? venue;
   final int? minute; // current minute if live
   final DateTime createdAt;
@@ -106,6 +107,7 @@ class MatchModel {
     this.group,
     this.round,
     this.scheduledAt,
+    this.startedAt,
     this.venue,
     this.minute,
     required this.createdAt,
@@ -134,6 +136,7 @@ class MatchModel {
       group: json['group'] as String?,
       round: json['round'] as int?,
       scheduledAt: (json['scheduledAt'] as Timestamp?)?.toDate(),
+      startedAt: (json['startedAt'] as Timestamp?)?.toDate(),
       venue: json['venue'] as String?,
       minute: json['minute'] as int?,
       createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -157,6 +160,7 @@ class MatchModel {
     'group': group,
     'round': round,
     'scheduledAt': scheduledAt != null ? Timestamp.fromDate(scheduledAt!) : null,
+    'startedAt': startedAt != null ? Timestamp.fromDate(startedAt!) : null,
     'venue': venue,
     'minute': minute,
     'createdAt': Timestamp.fromDate(createdAt),
@@ -170,6 +174,7 @@ class MatchModel {
     int? minute,
     String? venue,
     DateTime? scheduledAt,
+    DateTime? startedAt,
     DateTime? updatedAt,
   }) {
     return MatchModel(
@@ -189,6 +194,7 @@ class MatchModel {
       group: group,
       round: round,
       scheduledAt: scheduledAt ?? this.scheduledAt,
+      startedAt: startedAt ?? this.startedAt,
       venue: venue ?? this.venue,
       minute: minute ?? this.minute,
       createdAt: createdAt,

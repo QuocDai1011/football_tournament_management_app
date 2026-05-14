@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -39,11 +40,15 @@ class MatchDetailScreen extends ConsumerWidget {
                 actions: [
                   if (!match.isFinished)
                     TextButton(
-                      onPressed: () => _handleMatchControl(context, ref, match),
+                      onPressed: (!match.isLive && match.scheduledAt != null && DateTime.now().isBefore(match.scheduledAt!))
+                          ? null
+                          : () => _handleMatchControl(context, ref, match),
                       child: Text(
                         match.isLive ? 'End Match' : 'Start',
-                        style: const TextStyle(
-                            color: AppColors.primary,
+                        style: TextStyle(
+                            color: (!match.isLive && match.scheduledAt != null && DateTime.now().isBefore(match.scheduledAt!))
+                                ? AppColors.textTertiary
+                                : AppColors.primary,
                             fontWeight: FontWeight.w700),
                       ),
                     ),
@@ -141,12 +146,64 @@ class MatchDetailScreen extends ConsumerWidget {
   }
 }
 
-class _ScoreHeader extends StatelessWidget {
+class _ScoreHeader extends StatefulWidget {
   final MatchModel match;
   const _ScoreHeader({required this.match});
 
   @override
+  State<_ScoreHeader> createState() => _ScoreHeaderState();
+}
+
+class _ScoreHeaderState extends State<_ScoreHeader> {
+  Timer? _timer;
+  int _currentMinute = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateMinute();
+    if (widget.match.isLive) {
+      _timer = Timer.periodic(const Duration(seconds: 10), (_) => _updateMinute());
+    }
+  }
+
+  @override
+  void didUpdateWidget(_ScoreHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateMinute();
+    if (widget.match.isLive && _timer == null) {
+      _timer = Timer.periodic(const Duration(seconds: 10), (_) => _updateMinute());
+    } else if (!widget.match.isLive) {
+      _timer?.cancel();
+      _timer = null;
+    }
+  }
+
+  void _updateMinute() {
+    if (!mounted) return;
+    if (widget.match.isLive && widget.match.startedAt != null) {
+      final diff = DateTime.now().difference(widget.match.startedAt!).inMinutes;
+      setState(() {
+        _currentMinute = diff;
+      });
+    } else {
+      if (mounted) {
+        setState(() {
+          _currentMinute = widget.match.minute ?? 0;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final match = widget.match;
     return Container(
       decoration: const BoxDecoration(gradient: AppColors.darkGradient),
       padding: const EdgeInsets.all(24),
@@ -169,7 +226,7 @@ class _ScoreHeader extends StatelessWidget {
             ),
             child: Text(
               match.isLive
-                  ? "${match.minute ?? 0}' LIVE"
+                  ? "$_currentMinute' LIVE"
                   : match.status.displayName.toUpperCase(),
               style: TextStyle(
                 color: match.isLive ? AppColors.live : AppColors.textTertiary,

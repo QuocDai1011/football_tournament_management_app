@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../players/domain/models/player_model.dart';
 
@@ -13,9 +14,7 @@ class PlayerCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('View ${player.name} profile')),
-        );
+        context.push('/players/${player.id}');
       },
       child: Container(
         padding: const EdgeInsets.all(12),

@@ -13,7 +13,8 @@ import '../../../../shared/widgets/glass_container.dart';
 
 class PlayerFormScreen extends ConsumerStatefulWidget {
   final String? playerId;
-  const PlayerFormScreen({super.key, this.playerId});
+  final String? initialTeamId;
+  const PlayerFormScreen({super.key, this.playerId, this.initialTeamId});
 
   @override
   ConsumerState<PlayerFormScreen> createState() => _PlayerFormScreenState();
@@ -34,6 +35,7 @@ class _PlayerFormScreenState extends ConsumerState<PlayerFormScreen> {
   void initState() {
     super.initState();
     _isEditing = widget.playerId != null;
+    _selectedTeamId = widget.initialTeamId;
     if (_isEditing) _loadExisting();
   }
 

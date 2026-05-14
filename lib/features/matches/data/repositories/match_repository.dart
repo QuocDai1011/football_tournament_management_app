@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/match_model.dart';
 import '../../../../core/services/firestore_service.dart';
@@ -9,6 +10,7 @@ import '../../../../core/algorithms/fixture_generator.dart';
 abstract class MatchRepository {
   Stream<List<MatchModel>> watchMatches({String? tournamentId});
   Stream<List<MatchEvent>> watchMatchEvents(String matchId);
+  Stream<MatchModel?> watchMatch(String id);
   Future<Either<Failure, MatchModel>> getMatch(String id);
   Future<Either<Failure, String>> createMatch(MatchModel match);
   Future<Either<Failure, void>> updateMatch(MatchModel match);
@@ -66,6 +68,14 @@ class MatchRepositoryImpl implements MatchRepository {
         .map((snap) => snap.docs
             .map((d) => MatchEvent.fromJson(d.data(), d.id))
             .toList());
+  }
+
+  @override
+  Stream<MatchModel?> watchMatch(String id) {
+    return _firestore.documentStream(FirestoreCollections.matches, id).map((doc) {
+      if (!doc.exists) return null;
+      return MatchModel.fromJson(doc.data()!, doc.id);
+    });
   }
 
   @override
@@ -176,6 +186,7 @@ class MatchRepositoryImpl implements MatchRepository {
       await _firestore.updateDocument(FirestoreCollections.matches, matchId, {
         'status': MatchStatus.live.value,
         'minute': 0,
+        'startedAt': Timestamp.fromDate(DateTime.now()),
       });
       return const Right(null);
     } catch (e) {
@@ -299,7 +310,6 @@ final matchEventsProvider =
 });
 
 final matchDetailProvider =
-    FutureProvider.family<MatchModel?, String>((ref, id) async {
-  final result = await ref.read(matchRepositoryProvider).getMatch(id);
-  return result.getOrNull();
+    StreamProvider.family<MatchModel?, String>((ref, id) {
+  return ref.watch(matchRepositoryProvider).watchMatch(id);
 });

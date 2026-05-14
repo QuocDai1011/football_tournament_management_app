@@ -143,7 +143,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.playerCreate,
-            builder: (_, __) => const PlayerFormScreen(),
+            builder: (context, state) {
+              final teamId = state.uri.queryParameters['teamId'];
+              return PlayerFormScreen(initialTeamId: teamId);
+            },
           ),
           GoRoute(
             path: AppRoutes.playerDetail,

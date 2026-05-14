@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../teams/domain/models/team_model.dart';
 
@@ -11,9 +12,7 @@ class TeamCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('View ${team.name} profile')),
-        );
+        context.push('/teams/${team.id}');
       },
       child: Container(
         decoration: BoxDecoration(

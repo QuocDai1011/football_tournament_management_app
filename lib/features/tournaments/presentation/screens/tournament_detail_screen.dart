@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../data/repositories/tournament_repository.dart';
 import '../../domain/models/tournament_model.dart';
 import '../../../../shared/widgets/loading_states.dart';
@@ -176,6 +177,11 @@ class TournamentDetailScreen extends ConsumerWidget {
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 80)),
             ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => context.push('${AppRoutes.registrations}?tournamentId=$id'),
+            backgroundColor: AppColors.primary,
+            child: const Icon(Icons.group_add),
           ),
         );
       },

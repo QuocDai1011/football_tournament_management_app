@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../data/repositories/team_repository.dart';
 import '../../../players/data/repositories/player_repository.dart';
 import '../../../players/domain/models/player_model.dart';
@@ -141,6 +142,11 @@ class TeamDetailScreen extends ConsumerWidget {
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 80)),
             ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => context.push('${AppRoutes.playerCreate}?teamId=$id'),
+            backgroundColor: AppColors.primary,
+            child: const Icon(Icons.person_add),
           ),
         );
       },

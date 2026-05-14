@@ -136,8 +136,69 @@ class _MatchFormScreenState extends ConsumerState<MatchFormScreen> {
       return;
     }
 
+    if (_scheduledAt == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a scheduled date & time'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     final now = DateTime.now();
+
+    // Check overlapping schedules
+    if (_scheduledAt != null) {
+      try {
+        final existingMatches = await ref
+            .read(matchRepositoryProvider)
+            .watchMatches(tournamentId: _selectedTournamentId)
+            .first;
+
+        for (final m in existingMatches) {
+          if (m.id == widget.matchId || m.scheduledAt == null) continue;
+
+          final timeDiff = _scheduledAt!.difference(m.scheduledAt!).inMinutes.abs();
+          if (timeDiff < 120) { // 2 hours window
+            final isSameTeam = m.homeTeamId == _homeTeamId ||
+                m.awayTeamId == _homeTeamId ||
+                m.homeTeamId == _awayTeamId ||
+                m.awayTeamId == _awayTeamId;
+
+            if (isSameTeam) {
+              setState(() => _isLoading = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('One of the teams already has a match scheduled around ${DateFormat('MMM d, HH:mm').format(m.scheduledAt!)}.'),
+                  backgroundColor: AppColors.error,
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+              return;
+            }
+
+            final venueText = _venueController.text.trim();
+            final isSameVenue = venueText.isNotEmpty && m.venue?.toLowerCase() == venueText.toLowerCase();
+
+            if (isSameVenue) {
+              setState(() => _isLoading = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Venue "$venueText" is already booked for a match around ${DateFormat('MMM d, HH:mm').format(m.scheduledAt!)}.'),
+                  backgroundColor: AppColors.error,
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        // Proceed if check fails (e.g., offline)
+      }
+    }
 
     final match = MatchModel(
       id: _existing?.id ?? const Uuid().v4(),
